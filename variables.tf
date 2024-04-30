@@ -59,20 +59,7 @@ variable "ansible_windows_hosts_admin_username" {
 variable "ansible_windows_hosts" {
   description = "List of Ansible Windows host names"
   default = [
-    "server1",
-    "server2",
-    "server3",
-    "server4",
-    "server5",
-    "server6",
-    "server7",
-    "server8",
-    "server9",
-    "server10",
-    "server11",
-    "server12",
-    "server13",
-    "server14",
-    "server15",
+    "server01",
+    "server02"
   ]
 }
