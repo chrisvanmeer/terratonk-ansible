@@ -1,0 +1,73 @@
+## GENERIC
+
+variable "ssh_user" {
+  default = "ansible"
+}
+
+variable "ssh_pub_key_file" {
+  default = "~/.ssh/id_ed25519.pub"
+}
+
+variable "project_name" {
+  description = "The name of the Google project"
+}
+
+variable "region" {
+  description = "The Google region of your choice"
+  default     = "europe-west4"
+}
+
+variable "zone" {
+  description = "The Google zone of your choice within the region"
+  default     = "europe-west4-a"
+}
+
+## CONTROLLER
+
+variable "ansible_controller_name" {
+  description = "Name of the Ansible Controller"
+  default     = "controller"
+}
+
+variable "ansible_controller_image" {
+  description = "The image for running the Ansible Controller"
+  default     = "rocky-linux-9-v20240415"
+}
+
+variable "ansible_controller_machine_type" {
+  description = "The machine type for running the Ansible Controller"
+  default     = "n1-standard-1"
+}
+
+## WINDOWS HOSTS
+
+variable "ansible_windows_hosts_image" {
+  description = "The image for running the Ansible Windows hosts"
+  default     = "windows-cloud/windows-2019"
+}
+
+variable "ansible_windows_hosts_machine_type" {
+  description = "The machine type for running the Ansible Windows hosts"
+  default     = "n1-standard-1"
+}
+
+variable "ansible_windows_hosts" {
+  description = "List of Ansible Windows host names"
+  default = [
+    "server1",
+    "server2",
+    "server3",
+    "server4",
+    "server5",
+    "server6",
+    "server7",
+    "server8",
+    "server9",
+    "server10",
+    "server11",
+    "server12",
+    "server13",
+    "server14",
+    "server15",
+  ]
+}
