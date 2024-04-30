@@ -53,29 +53,6 @@ resource "google_compute_firewall" "allow_rdp" {
   target_tags   = ["rdp"]
 }
 
-resource "google_compute_instance" "ansible_controller" {
-  name         = var.ansible_controller_name
-  zone         = var.zone
-  machine_type = var.ansible_controller_machine_type
-
-  metadata = {
-    ssh-keys = "${var.ansible_controller_ssh_user}:${file(var.ansible_controller_ssh_pub_key_file)}"
-  }
-  boot_disk {
-    initialize_params {
-      image = var.ansible_controller_image
-    }
-  }
-
-  network_interface {
-    network    = google_compute_network.ansible_network.id
-    subnetwork = google_compute_subnetwork.ansible_subnet.id
-    access_config {}
-  }
-
-  tags = ["ssh"]
-}
-
 resource "google_compute_instance" "ansible_windows_hosts" {
   count        = length(var.ansible_windows_hosts)
   name         = var.ansible_windows_hosts[count.index]
@@ -98,7 +75,6 @@ resource "google_compute_instance" "ansible_windows_hosts" {
 }
 
 resource "null_resource" "reset_windows_password" {
-  depends_on = [google_compute_instance.ansible_windows_hosts]
   count      = length(var.ansible_windows_hosts)
 
   triggers = {
@@ -107,6 +83,55 @@ resource "null_resource" "reset_windows_password" {
 
   provisioner "local-exec" {
     command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone}"
+  }
+  depends_on = [google_compute_instance.ansible_windows_hosts]
+}
+
+resource "local_file" "ansible_inventory" {
+  content = templatefile("inventory.tmpl",
+    {
+      windows_hosts = tomap({
+        for instance in google_compute_instance.ansible_windows_hosts :
+        instance.name => instance.network_interface.0.access_config.0.nat_ip
+      })
+    }
+  )
+  filename = "./inventory.ini"
+  depends_on = [google_compute_instance.ansible_windows_hosts]
+}
+
+resource "google_compute_instance" "ansible_controller" {
+  name         = var.ansible_controller_name
+  zone         = var.zone
+  machine_type = var.ansible_controller_machine_type
+
+  metadata = {
+    ssh-keys = "${var.ansible_controller_ssh_user}:${file(var.ansible_controller_ssh_pub_key_file)}"
+  }
+  boot_disk {
+    initialize_params {
+      image = var.ansible_controller_image
+    }
+  }
+
+  network_interface {
+    network    = google_compute_network.ansible_network.id
+    subnetwork = google_compute_subnetwork.ansible_subnet.id
+    access_config {}
+  }
+
+  tags = ["ssh"]
+  depends_on = [google_compute_instance.ansible_windows_hosts]
+
+  provisioner "file" {
+    source      = "./inventory.ini"
+    destination = "~/inventory.ini"
+    connection {
+      type        = "ssh"
+      host        = self.network_interface.0.access_config.0.nat_ip
+      user        = var.ansible_controller_ssh_user
+      private_key = file(var.ansible_controller_ssh_priv_key_file)
+    }
   }
 }
 

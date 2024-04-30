@@ -1,0 +1,5 @@
+[all]
+controller ansible_connection=local
+%{ for name, ip in windows_hosts ~}
+${name} ansible_host=${ip}
+%{ endfor ~}

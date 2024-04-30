@@ -25,6 +25,10 @@ variable "ansible_controller_ssh_pub_key_file" {
   default = "~/.ssh/id_ed25519.pub"
 }
 
+variable "ansible_controller_ssh_priv_key_file" {
+  default = "~/.ssh/id_ed25519"
+}
+
 variable "ansible_controller_name" {
   description = "Name of the Ansible Controller"
   default     = "controller"
