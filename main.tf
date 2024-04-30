@@ -121,7 +121,10 @@ resource "google_compute_instance" "ansible_controller" {
   }
 
   tags = ["ssh"]
-  depends_on = [google_compute_instance.ansible_windows_hosts]
+  depends_on = [
+    google_compute_instance.ansible_windows_hosts,
+    local_file.ansible_inventory
+  ]
 
   provisioner "file" {
     source      = "./inventory.ini"
