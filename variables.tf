@@ -51,6 +51,11 @@ variable "ansible_windows_hosts_machine_type" {
   default     = "n1-standard-1"
 }
 
+variable "ansible_windows_hosts_admin_username" {
+  description = "The admin username of the Windows hosts"
+  default     = "admini"
+}
+
 variable "ansible_windows_hosts" {
   description = "List of Ansible Windows host names"
   default = [

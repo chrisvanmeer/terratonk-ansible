@@ -4,6 +4,10 @@ terraform {
       source  = "hashicorp/google"
       version = "5.26.0"
     }
+    null = {
+      source  = "hashicorp/null"
+      version = "3.2.2"
+    }
   }
 }
 
@@ -91,6 +95,19 @@ resource "google_compute_instance" "ansible_windows_hosts" {
   }
 
   tags = ["rdp"]
+}
+
+resource "null_resource" "reset_windows_password" {
+  depends_on = [google_compute_instance.ansible_windows_hosts]
+  count      = length(var.ansible_windows_hosts)
+
+  triggers = {
+    instance_ip = google_compute_instance.ansible_windows_hosts[count.index].network_interface.0.access_config.0.nat_ip
+  }
+
+  provisioner "local-exec" {
+    command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone}"
+  }
 }
 
 # resource "google_dns_record_set" "vm_dns_records" {
