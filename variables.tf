@@ -1,15 +1,8 @@
 ## GENERIC
 
-variable "ssh_user" {
-  default = "ansible"
-}
-
-variable "ssh_pub_key_file" {
-  default = "~/.ssh/id_ed25519.pub"
-}
-
 variable "project_name" {
   description = "The name of the Google project"
+  # no default, so you will be prompted
 }
 
 variable "region" {
@@ -23,6 +16,14 @@ variable "zone" {
 }
 
 ## CONTROLLER
+
+variable "ansible_controller_ssh_user" {
+  default = "ansible"
+}
+
+variable "ansible_controller_ssh_pub_key_file" {
+  default = "~/.ssh/id_ed25519.pub"
+}
 
 variable "ansible_controller_name" {
   description = "Name of the Ansible Controller"

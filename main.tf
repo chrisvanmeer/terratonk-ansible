@@ -59,7 +59,7 @@ resource "google_compute_instance" "ansible_controller" {
   machine_type = var.ansible_controller_machine_type
 
   metadata = {
-    ssh-keys = "${var.ssh_user}:${file(var.ssh_pub_key_file)}"
+    ssh-keys = "${var.ansible_controller_ssh_user}:${file(var.ansible_controller_ssh_pub_key_file)}"
   }
   boot_disk {
     initialize_params {

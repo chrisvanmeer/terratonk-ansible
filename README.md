@@ -26,7 +26,7 @@ Either edit the `variables.tf` or create a `terraform.tfvars` file in this direc
 An example of a `terraform.tfvars` file could be:
 
 ```hcl
-project_name          = "myproject"
+project_name = "myproject"
 ansible_windows_hosts = [
     "server01",
     "server02",
