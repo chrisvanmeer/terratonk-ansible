@@ -130,7 +130,7 @@ resource "google_compute_instance" "ansible_controller" {
 
   provisioner "file" {
     source      = "./inventory.ini"
-    destination = "~/inventory.ini"
+    destination = "/home/${var.ansible_controller_ssh_user}/inventory.ini"
     connection {
       type        = "ssh"
       host        = self.network_interface.0.access_config.0.nat_ip
