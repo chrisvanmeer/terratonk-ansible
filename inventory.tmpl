@@ -1,5 +1,7 @@
-[all]
-controller ansible_connection=local
+[management_hosts]
+${management} ansible_connection=local
+
+[windows_hosts]
 %{ for name, ip in windows_hosts ~}
 ${name} ansible_host=${ip}
 %{ endfor ~}

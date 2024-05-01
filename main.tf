@@ -4,12 +4,22 @@ terraform {
       source  = "hashicorp/google"
       version = "5.26.0"
     }
+    local = {
+      source  = "hashicorp/local"
+      version = "2.5.1"
+    }
     null = {
       source  = "hashicorp/null"
       version = "3.2.2"
     }
+    time = {
+      source  = "hashicorp/time"
+      version = "0.11.1"
+    }
   }
 }
+
+## GENERIC
 
 provider "google" {
   project = var.project_name
@@ -53,6 +63,8 @@ resource "google_compute_firewall" "allow_rdp" {
   target_tags   = ["rdp"]
 }
 
+## WINDOWS HOSTS
+
 resource "google_compute_instance" "ansible_windows_hosts" {
   count        = length(var.ansible_windows_hosts)
   name         = var.ansible_windows_hosts[count.index]
@@ -74,17 +86,22 @@ resource "google_compute_instance" "ansible_windows_hosts" {
   tags = ["rdp"]
 }
 
+resource "time_sleep" "wait_10_seconds" {
+  depends_on      = [google_compute_instance.ansible_windows_hosts]
+  create_duration = "10s"
+}
+
 resource "null_resource" "reset_windows_password" {
-  count      = length(var.ansible_windows_hosts)
+  count = length(var.ansible_windows_hosts)
 
   triggers = {
     instance_ip = google_compute_instance.ansible_windows_hosts[count.index].network_interface.0.access_config.0.nat_ip
   }
 
   provisioner "local-exec" {
-    command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone}"
+    command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone} > ${var.ansible_windows_hosts[count.index]}-password.txt"
   }
-  depends_on = [google_compute_instance.ansible_windows_hosts]
+  depends_on = [time_sleep.wait_10_seconds]
 }
 
 resource "local_file" "ansible_inventory" {
@@ -93,12 +110,15 @@ resource "local_file" "ansible_inventory" {
       windows_hosts = tomap({
         for instance in google_compute_instance.ansible_windows_hosts :
         instance.name => instance.network_interface.0.access_config.0.nat_ip
-      })
+      }),
+      management = var.ansible_controller_name
     }
   )
-  filename = "./inventory.ini"
+  filename   = "./inventory.ini"
   depends_on = [google_compute_instance.ansible_windows_hosts]
 }
+
+## CONTROLLER
 
 resource "google_compute_instance" "ansible_controller" {
   name         = var.ansible_controller_name
