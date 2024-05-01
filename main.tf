@@ -144,7 +144,7 @@ resource "google_compute_instance" "ansible_controller" {
   depends_on = [
     google_compute_instance.ansible_windows_hosts,
     local_file.ansible_inventory,
-    time_sleep.wait_30_seconds
+    null_resource.reset_windows_password
   ]
 
   provisioner "file" {
