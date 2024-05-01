@@ -60,6 +60,8 @@ which have the formate `password-<server_name>.txt`.
 
 If for some reason the run fails on resetting the passwords, you can run `terraform apply` again.
 
+Log into the Ansible controller with the user you set in the variables (default: `ansible`).
+
 ## Author
 
 - Chris van Meer <c.v.meer@atcomputing.nl>
