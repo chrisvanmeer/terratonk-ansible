@@ -86,24 +86,6 @@ resource "google_compute_instance" "ansible_windows_hosts" {
   tags = ["rdp"]
 }
 
-resource "time_sleep" "wait_30_seconds" {
-  create_duration = "30s"
-  depends_on      = [google_compute_instance.ansible_windows_hosts]
-}
-
-resource "null_resource" "reset_windows_password" {
-  count = length(var.ansible_windows_hosts)
-
-  triggers = {
-    instance_ip = google_compute_instance.ansible_windows_hosts[count.index].network_interface.0.access_config.0.nat_ip
-  }
-
-  provisioner "local-exec" {
-    command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone} > password-${var.ansible_windows_hosts[count.index]}.txt"
-  }
-  depends_on = [time_sleep.wait_30_seconds]
-}
-
 resource "local_file" "ansible_inventory" {
   content = templatefile("inventory.tmpl",
     {
@@ -143,8 +125,7 @@ resource "google_compute_instance" "ansible_controller" {
   tags = ["ssh"]
   depends_on = [
     google_compute_instance.ansible_windows_hosts,
-    local_file.ansible_inventory,
-    null_resource.reset_windows_password
+    local_file.ansible_inventory
   ]
 
   provisioner "file" {
@@ -158,6 +139,32 @@ resource "google_compute_instance" "ansible_controller" {
     }
   }
 }
+
+
+## PASSWORD HACK
+
+resource "time_sleep" "wait_for_completion" {
+  create_duration = "30s"
+  depends_on = [
+    google_compute_instance.ansible_windows_hosts,
+    google_compute_instance.ansible_controller
+  ]
+}
+
+
+resource "null_resource" "reset_windows_password" {
+  count = length(var.ansible_windows_hosts)
+
+  triggers = {
+    instance_ip = google_compute_instance.ansible_windows_hosts[count.index].network_interface.0.access_config.0.nat_ip
+  }
+
+  provisioner "local-exec" {
+    command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone} > password-${var.ansible_windows_hosts[count.index]}.txt"
+  }
+  depends_on = [time_sleep.wait_for_completion]
+}
+
 
 # resource "google_dns_record_set" "vm_dns_records" {
 #   count        = length(var.ansible_windows_hosts)
