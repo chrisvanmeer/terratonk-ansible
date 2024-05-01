@@ -58,6 +58,8 @@ At the end of the run, the IP addresses of the VM's are outputted.
 For the Windows hosts, separate text files are created in the root of this directory
 which have the formate `password-<server_name>.txt`.
 
+If for some reason the run fails on resetting the passwords, you can run `terraform apply` again.
+
 ## Author
 
 - Chris van Meer <c.v.meer@atcomputing.nl>
