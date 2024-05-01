@@ -98,4 +98,4 @@ terraform.rc
 inventory.ini
 
 # Server passwords
-*-password.txt
+*password*.txt

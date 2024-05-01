@@ -54,7 +54,9 @@ terraform plan
 terraform apply
 ```
 
-Watch the output for both the auto-generated Windows admin passwords and the list of IP addresses.
+At the end of the run, the IP addresses of the VM's are outputted.  
+For the Windows hosts, separate text files are created in the root of this directory
+which have the formate `password-<server_name>.txt`.
 
 ## Author
 

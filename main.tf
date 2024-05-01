@@ -86,9 +86,9 @@ resource "google_compute_instance" "ansible_windows_hosts" {
   tags = ["rdp"]
 }
 
-resource "time_sleep" "wait_10_seconds" {
+resource "time_sleep" "wait_30_seconds" {
+  create_duration = "30s"
   depends_on      = [google_compute_instance.ansible_windows_hosts]
-  create_duration = "10s"
 }
 
 resource "null_resource" "reset_windows_password" {
@@ -99,9 +99,9 @@ resource "null_resource" "reset_windows_password" {
   }
 
   provisioner "local-exec" {
-    command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone} > ${var.ansible_windows_hosts[count.index]}-password.txt"
+    command = "gcloud compute reset-windows-password ${var.ansible_windows_hosts[count.index]} --user=${var.ansible_windows_hosts_admin_username} --zone=${var.zone} > password-${var.ansible_windows_hosts[count.index]}.txt"
   }
-  depends_on = [time_sleep.wait_10_seconds]
+  depends_on = [time_sleep.wait_30_seconds]
 }
 
 resource "local_file" "ansible_inventory" {
