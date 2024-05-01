@@ -144,7 +144,7 @@ resource "google_compute_instance" "ansible_controller" {
 ## PASSWORD HACK
 
 resource "time_sleep" "wait_for_completion" {
-  create_duration = "30s"
+  create_duration = "60s"
   depends_on = [
     google_compute_instance.ansible_windows_hosts,
     google_compute_instance.ansible_controller
